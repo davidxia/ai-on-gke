@@ -25,7 +25,7 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
-/*resource "google_container_cluster" "ml_cluster" {
+resource "google_container_cluster" "ml_cluster" {
   count = var.create_cluster ? 1 : 0
   name     = var.cluster_name
   location = var.cluster_location
@@ -82,12 +82,12 @@ resource "google_container_node_pool" "gpu_pool" {
     }
   }
   depends_on = [resource.google_container_cluster.ml_cluster]
-}*/
+}
 
 data "google_container_cluster" "default" {
   name     = var.cluster_name
   location = var.cluster_location
-  depends_on = [module.gke-cluster]
+  depends_on = [resource.google_container_cluster.ml_cluster]
 }
 
 locals {
@@ -124,21 +124,7 @@ provider "helm" {
 }
 
 data "kubernetes_all_namespaces" "allns" {
-  depends_on = [module.gke-cluster]
-}
-
-module "gke-cluster" {
-  source      = "../../infrastructure"
-  project_id  = var.project_id
-  create_cluster = var.create_cluster
-  create_network = true
-  network_name = "rag-network-11"
-  subnetwork_name = "rag-subnet-11"
-  private_cluster = false
-  autopilot_cluster = false
-  cluster_name = var.cluster_name
-  cluster_region = var.cluster_location
-  cluster_zones = ["us-central1-a", "us-central1-c"]
+  depends_on = [resource.google_container_cluster.ml_cluster]
 }
 
 module "kuberay-operator" {
