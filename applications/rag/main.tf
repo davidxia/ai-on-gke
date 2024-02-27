@@ -36,7 +36,7 @@ resource "google_container_node_pool" "gpu_pool" {
   name       = "gpu-pool"
   location   = var.cluster_location
   cluster    = var.cluster_name
-  node_count = 3
+  node_count = 2
 
   autoscaling {
     total_min_node_count = "1"
@@ -65,9 +65,10 @@ resource "google_container_node_pool" "gpu_pool" {
     guest_accelerator {
       type  = "nvidia-l4"
       count = 1
-      #gpu_driver_installation_config {
-        #gpu_driver_version = "DEFAULT"
-      #}
+      gpu_driver_installation_config =
+      {
+        gpu_driver_version = "DEFAULT"
+      }
     }
 
     image_type   = "cos_containerd"

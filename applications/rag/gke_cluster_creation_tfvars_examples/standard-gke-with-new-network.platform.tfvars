@@ -54,30 +54,3 @@ cpu_pools = [{
   initial_node_count     = 1
   accelerator_count      = 0
 }]
-
-## make sure required gpu quotas are available in the specified region
-enable_gpu = true
-gpu_pools = [{
-  name                   = "gpu-pool"
-  machine_type           = "g2-standard-24"
-  node_locations         = "us-central1-a,us-central1-b"
-  autoscaling            = true
-  min_count              = 1
-  max_count              = 5
-  local_ssd_count        = 2
-  spot                   = false
-  disk_size_gb           = 100
-  disk_type              = "pd-standard"
-  image_type             = "COS_CONTAINERD"
-  enable_gcfs            = true
-  enable_gvnic           = true
-  logging_variant        = "DEFAULT"
-  auto_repair            = true
-  auto_upgrade           = true
-  create_service_account = true
-  preemptible            = false
-  initial_node_count     = 1
-  accelerator_count      = 2
-  accelerator_type       = "nvidia-l4"
-  gpu_driver_version     = "DEFAULT"
-}]
