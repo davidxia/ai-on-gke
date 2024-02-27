@@ -189,8 +189,8 @@ singleuser:
         node_selector:
           cloud.google.com/gke-tpu-accelerator: "tpu-v4-podslice"
           cloud.google.com/gke-tpu-topology: "2x2x1"
-    - display_name: "GPU T4"
-      description: "Creates GPU VMs (T4) as the compute for notebook execution"
+    - display_name: "GPU L4"
+      description: "Creates GPU VMs (L4) as the compute for notebook execution"
       profile_options:
         storage:
           display_name: "Storage"
@@ -221,7 +221,7 @@ singleuser:
           nvidia.com/gpu: "2"
       #  possible values: nvidia-tesla-k80, nvidia-tesla-p100, nvidia-tesla-p4, nvidia-tesla-v100, nvidia-tesla-t4, nvidia-tesla-a100, nvidia-a100-80gb, nvidia-l4
         node_selector:
-          cloud.google.com/gke-accelerator: "nvidia-tesla-t4"
+          cloud.google.com/gke-accelerator: "nvidia-l4"
     - display_name: "GPU A100"
       description: "Creates GPU VMs (A100) as the compute for notebook execution"
       profile_options:

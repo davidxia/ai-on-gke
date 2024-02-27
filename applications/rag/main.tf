@@ -25,9 +25,69 @@ data "google_project" "project" {
   project_id = var.project_id
 }
 
+resource "google_container_cluster" "ml_cluster" {
+  count = var.create_cluster ? 1 : 0
+  name     = var.cluster_name
+  location = var.cluster_location
+  initial_node_count       = 1
+}
+
+resource "google_container_node_pool" "gpu_pool" {
+  name       = "gpu-pool"
+  location   = var.cluster_location
+  cluster    = var.cluster_name
+  node_count = 3
+
+  autoscaling {
+    total_min_node_count = "1"
+    total_max_node_count = "5"
+  }
+
+  management {
+    auto_repair  = "true"
+    auto_upgrade = "true"
+  }
+
+  node_config {
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/logging.write",
+      "https://www.googleapis.com/auth/monitoring",
+      "https://www.googleapis.com/auth/devstorage.read_only",
+      "https://www.googleapis.com/auth/trace.append",
+      "https://www.googleapis.com/auth/service.management.readonly",
+      "https://www.googleapis.com/auth/servicecontrol",
+    ]
+
+    labels = {
+      env = var.project_id
+    }
+
+    guest_accelerator {
+      type  = "nvidia-l4"
+      count = 1
+      #gpu_driver_installation_config {
+        #gpu_driver_version = "DEFAULT"
+      #}
+    }
+
+    image_type   = "cos_containerd"
+    machine_type = "g2-standard-24"
+    tags         = ["gke-node", "${var.project_id}-gke"]
+
+    disk_size_gb = "30"
+    disk_type    = "pd-standard"
+
+    metadata = {
+      disable-legacy-endpoints = "true"
+    }
+  }
+  depends_on = [resource.google_container_cluster.ml_cluster]
+}
+
 data "google_container_cluster" "default" {
   name     = var.cluster_name
   location = var.cluster_location
+  depends_on = [resource.google_container_cluster.ml_cluster]
 }
 
 locals {
@@ -63,7 +123,9 @@ provider "helm" {
   }
 }
 
-data "kubernetes_all_namespaces" "allns" {}
+data "kubernetes_all_namespaces" "allns" {
+  depends_on = [resource.google_container_cluster.ml_cluster]
+}
 
 module "kuberay-operator" {
   source                 = "../../modules/kuberay-operator"
@@ -74,6 +136,7 @@ module "kuberay-operator" {
   google_service_account = var.ray_service_account
   create_service_account = var.create_ray_service_account
   enable_autopilot       = data.google_container_cluster.default.enable_autopilot
+  depends_on = [resource.google_container_cluster.ml_cluster]
 }
 
 module "gcs" {
@@ -113,11 +176,11 @@ module "jupyterhub" {
   members_allowlist         = var.members_allowlist
 }
 
-module "kuberay-logging" {
-  source     = "../../modules/kuberay-logging"
-  depends_on = [module.kuberay-operator]
-  namespace  = var.kubernetes_namespace
-}
+#module "kuberay-logging" {
+  #source     = "../../modules/kuberay-logging"
+  #depends_on = [module.kuberay-operator]
+  #namespace  = var.kubernetes_namespace
+#}
 
 module "kuberay-cluster" {
   source                 = "../../modules/kuberay-cluster"
@@ -126,7 +189,7 @@ module "kuberay-cluster" {
   namespace              = var.kubernetes_namespace
   gcs_bucket             = var.gcs_bucket
   create_namespace       = !contains(data.kubernetes_all_namespaces.allns.namespaces, var.kubernetes_namespace)
-  enable_tpu             = data.google_container_cluster.default.enable_tpu
+  enable_tpu             = false
   enable_autopilot       = data.google_container_cluster.default.enable_autopilot
   google_service_account = var.ray_service_account
   grafana_host           = module.kuberay-monitoring.grafana_uri

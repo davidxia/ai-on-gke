@@ -101,7 +101,7 @@ head:
     gke-gcsfuse/ephemeral-storage-limit: 20Gi
   nodeSelector:
     iam.gke.io/gke-metadata-server-enabled: "true"
-    cloud.google.com/gke-accelerator: "nvidia-tesla-t4"
+    cloud.google.com/gke-accelerator: "nvidia-l4"
   tolerations: []
   affinity: {}
   # Ray container security context.
@@ -198,7 +198,7 @@ worker:
     gke-gcsfuse/ephemeral-storage-limit: 20Gi
   nodeSelector:
     iam.gke.io/gke-metadata-server-enabled: "true"
-    cloud.google.com/gke-accelerator: "nvidia-tesla-t4"
+    cloud.google.com/gke-accelerator: "nvidia-l4"
   tolerations: []
   affinity: {}
   # Ray container security context.

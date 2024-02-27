@@ -13,14 +13,14 @@
 # limitations under the License.
 
 # prometheus 
-resource "kubernetes_manifest" "manifests" {
-  for_each = fileset("${path.module}/config/", "*.yaml")
-  manifest = yamldecode(templatefile("${path.module}/config/${each.value}", { 
-    namespace: var.namespace
-    project_id: var.project_id
-    k8s_service_account: var.k8s_service_account
-    }))
-}
+#resource "kubernetes_manifest" "manifests" {
+  #for_each = fileset("${path.module}/config/", "*.yaml")
+  #manifest = yamldecode(templatefile("${path.module}/config/${each.value}", { 
+    #namespace: var.namespace
+    #project_id: var.project_id
+    #k8s_service_account: var.k8s_service_account
+    #}))
+#}
 
 # grafana
 resource "helm_release" "grafana" {
