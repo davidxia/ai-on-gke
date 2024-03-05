@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# fetch all namespaces
+data "kubernetes_all_namespaces" "allns" {}
+
 # Used to generate ip address
 resource "random_string" "random" {
   length  = 4
@@ -36,7 +39,7 @@ resource "helm_release" "iap_jupyter" {
   name             = "iap-jupyter"
   chart            = "${path.module}/charts/iap/"
   namespace        = var.namespace
-  create_namespace = true 
+  create_namespace = !contains(data.kubernetes_all_namespaces.allns.namespaces, var.namespace)
   # timeout increased to support autopilot scaling resources, and give enough time to complete the deployment 
   timeout = 1200
   set {
@@ -108,7 +111,7 @@ resource "helm_release" "iap_frontend" {
   name             = "iap-frontend"
   chart            = "${path.module}/charts/iap/"
   namespace        = var.namespace
-  create_namespace = true 
+  create_namespace = !contains(data.kubernetes_all_namespaces.allns.namespaces, var.namespace)
   # timeout increased to support autopilot scaling resources, and give enough time to complete the deployment
   timeout = 1200
   set {
