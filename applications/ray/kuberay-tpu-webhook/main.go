@@ -69,6 +69,7 @@ func getNumTPUHosts(topology string) (int, error) {
 	if topology == "" {
 		return 0, errors.New("TPU topology not specified")
 	}
+	klog.Infof("Topology: %s", topology)
 	topologyVals := strings.Split(topology, "x")
 	chips := 1
 	for i := 0; i < len(topologyVals); i++ {
@@ -79,8 +80,11 @@ func getNumTPUHosts(topology string) (int, error) {
 		}
 		chips *= dim
 	}
+	klog.Infof("chips: %d", chips)
 	// number VMs = number chips / 4
-	return max(chips/4, 1), nil
+	num_vms := max(chips/4, 1)
+	klog.Infof("VMs: %d", num_vms)
+	return num_vms, nil
 }
 
 // check if request is for TPU multi-host
@@ -282,8 +286,10 @@ func mutateRayCluster(admissionReview *admissionv1.AdmissionReview) (*admissionv
 			if err != nil {
 				return nil, err
 			}
+			klog.Infof("isMultiHost: %t", isMultiHost)
 			if isMultiHost {
 				joinedHostNames, err := genDNSHostnames(workerGroupSpec)
+				klog.Infof("joinedHostNames: %s", joinedHostNames)
 				if err != nil {
 					return nil, err
 				}
@@ -296,6 +302,9 @@ func mutateRayCluster(admissionReview *admissionv1.AdmissionReview) (*admissionv
 	if err != nil {
 		return nil, err
 	}
+
+	klog.Infof("Patches: %s", patchBytes)
+	klog.Infof("PATCHES AS STRING: %s", string(patchBytes[:]))
 
 	// Create AdmissionResponse
 	admissionResponse := &admissionv1.AdmissionResponse{
@@ -477,6 +486,7 @@ func main() {
 			return
 		}
 
+		klog.Infof("KIND: %s", admissionReview.Request.Kind.Kind)
 		if admissionReview.Request.Kind.Kind == "RayCluster" {
 			klog.Info("Received review for RayCluster")
 			response, err := mutateRayCluster(admissionReview)
