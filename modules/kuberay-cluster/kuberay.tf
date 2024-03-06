@@ -45,16 +45,3 @@ resource "helm_release" "ray-cluster" {
     })
   ]
 }
-
-resource "kubernetes_service" "tpu-worker-svc" {
-  count = var.enable_tpu ? 1 : 0
-  metadata {
-    name = "${helm_release.ray-cluster.name}-kuberay-tpu-worker-svc"
-  }
-  spec {
-    selector = {
-      "cloud.google.com/gke-ray-node-type" = "worker"
-    }
-    cluster_ip = "None"
-  }
-}
