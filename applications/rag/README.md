@@ -135,18 +135,20 @@ This step generates the vector embeddings for your input dataset. Currently, the
 
 4. Once logged in, choose the `CPU` preset. Go to File -> Open From URL & upload the notebook `rag-kaggle-ray-sql.ipynb` from `https://raw.githubusercontent.com/GoogleCloudPlatform/ai-on-gke/main/applications/rag/example_notebooks/rag-kaggle-ray-sql-latest.ipynb`. This path can also be found by going to the [notebook location](https://github.com/GoogleCloudPlatform/ai-on-gke/blob/main/applications/rag/example_notebooks/rag-kaggle-ray-sql-latest.ipynb) and selecting `Raw`.
 
-5. Replace the variables in the 3rd cell with the following to access the database:
-    * `INSTANCE_CONNECTION_NAME`: `<project_id>:<region>:pgvector-instance`
-    * `DB_USER`: `rag-user-notebook`
-    * `DB_PASS`: password from step 1
 
-6. Create a Kaggle account and navigate to https://www.kaggle.com/settings/account and generate an API token. See https://www.kaggle.com/docs/api#authentication how to create one from https://kaggle.com/settings. This token is used in the notebook to access the [Google Maps Restaurant Reviews dataset](https://www.kaggle.com/datasets/denizbilginn/google-maps-restaurant-reviews)
+5. Create a Kaggle account and navigate to https://www.kaggle.com/settings/account and generate an API token. See https://www.kaggle.com/docs/api#authentication how to create one from https://kaggle.com/settings. This token is used in the notebook to access the [Google Maps Restaurant Reviews dataset](https://www.kaggle.com/datasets/denizbilginn/google-maps-restaurant-reviews)
 
-8. Replace the kaggle username and api token in 2nd cell with your credentials (can be found in the `kaggle.json` file created by Step 6):
-    * `os.environ['KAGGLE_USERNAME']`
-    * `os.environ['KAGGLE_KEY']`
+6. Replace the variables in the 1st cell with custom values:
+    * Kaggle credentials (can be found in the `kaggle.json` file created by Step 5):
+        * `os.environ['KAGGLE_USERNAME']`
+        * `os.environ['KAGGLE_KEY']`
+    * DB credentials:
+        * `DB_REGION` = ${CLUSTER_REGION:?} # Note this needs to be the GCE region the instance is in (not zone).
+        * `PROJECT_ID`= <project_id>
+        * `DB_USER`: `rag-user-notebook`
+        * `DB_PASS`: password from step 1
 
-9. Run all the cells in the notebook. This generates vector embeddings for the input dataset (`denizbilginn/google-maps-restaurant-reviews`) and stores them in the `pgvector-instance` via a Ray job.
+7. Run all the cells in the notebook. This generates vector embeddings for the input dataset (`denizbilginn/google-maps-restaurant-reviews`) and stores them in the `pgvector-instance` via a Ray job.
     * When the last cell says the job has succeeded (eg: `Job 'raysubmit_APungAw6TyB55qxk' succeeded`), the vector embeddings have been generated and we can launch the frontend chat interface.
     * Ray may take several minutes to create the runtime environment. During this time, the job will appear to be missing (e.g. `Status message: Job has not started yet`).
 
